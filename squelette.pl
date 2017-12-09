@@ -5,6 +5,7 @@
 :- style_check(- singleton).
 :- use_module(library(clpfd)).
 
+
 % ---------------------------------------------------------------------- %
 %                                                                        %
 %                        PREDICAT PRINCIPAL                              %
@@ -12,25 +13,26 @@
 % ---------------------------------------------------------------------- %
 testNoms([  manon, alice, juliette, lucie, charlotte, olivia, margaux,
                      jules, hugo, tom, louis, paul, jean, antoine  ]).
+testNoms2([  manon, alice, juliette, paul, jean, antoine  ]).
 
-go :- Lconvives = [  manon, alice,
+go :- Lconvives = [  manon, alice,juliette,
               %    juliette, lucie,
               %    charlotte, olivia, margaux, jules, hugo, tom, louis, paul,
-                     jean, antoine],
+                     paul,jean, antoine],
       table(Lconvives).
 
 table(Lconvives,Lassoc) :-
 
     length([anne,michel|Lconvives],Nb),
     produire_lassoc([anne,michel|Lconvives],Nb,Lassoc),
- %   alternance_homme_femme(Lassoc,Nb).
+    alternance_homme_femme(Lassoc,Nb),
+ %   meme_hobby(Lassoc,Nb),
 /*
-    meme_hobby(Lassoc,Nb),
+
     pas_epoux_cote_a_cote(Lassoc,Nb),
     pas_incompatibilite(Lassoc,Nb),
     places_differentes(Lassoc),
-    sort(2,@<,Lassoc,Lassoc_trie),
-    impression_table(Lassoc_trie).
+
 */
     label_places(Lassoc),
     sort(2,@<,Lassoc,Lassoc_trie),
@@ -69,17 +71,16 @@ getAssoc(List,Nom,Var):- member( pers_var(Nom,Var) , List).
 
 % Alternance homme-femme
 % ----------------------
-/*
-alternance_homme_femme( [persvar(Pers,Var)|Rest],Nb ) :-
-    oddEven(Pers,Var).
+alternance_homme_femme( [],_ ).
+alternance_homme_femme( [pers_var(P,V)|Rest],Nb ) :-
+    sexe(P,m),
+    V mod 2 #= 0,
+    alternance_homme_femme( Rest,Nb ).
 
-oddEven(Pers,Var) :-
-    (   sexe(Pers,f)*-> true,                         %goal
-         1 #= Var mod 2                               %if True
-    ;   true,
-        0 #= Var mod 2                                %else
-    ).
-*/
+alternance_homme_femme( [pers_var(P,V)|Rest],Nb ) :-
+    sexe(P,f),
+    V mod 2 #= 1,
+    alternance_homme_femme( Rest,Nb ).
 
 
 
@@ -88,7 +89,22 @@ oddEven(Pers,Var) :-
 % Meme hobby
 % ----------
 
-meme_hobby( ) .
+/*
+meme_hobby( [],Nb ).
+meme_hobby( [pers_var(P,V)|Rest],Nb ) :-
+    member(pers_var(Pdr,Vdr),Rest),
+    hobby(P,L1),hobby(Pdr,L2),
+    compatible_hobby2( L1, L2),
+    Vdr =:= V+1,
+    meme_hobby(Rest,Nb).
+*/
+
+
+compatible_hobby2(L1,L2) :-
+   member(H,L1),
+   member(H,L2).
+
+
 
 
 
@@ -99,24 +115,16 @@ meme_hobby( ) .
 pas_epoux_cote_a_cote(  ) .
 
 
-
-
 % Pas d incompatibilite
 % ---------------------
 
 pas_incompatibilite(  ) .
 
 
-
-
 % Personnes a des places differentes
 % ----------------------------------
 
 places_differentes(  ) .
-
-
-
-
 
 % ---------------------------------------------------------------------- %
 %                                                                        %
