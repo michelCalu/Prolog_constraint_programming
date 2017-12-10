@@ -3,170 +3,68 @@
 :- set_prolog_stack(global, limit(8 000 000)).  % limit term space (8Mb)
 :- set_prolog_stack(local,  limit(2 000 000)).  % limit environment space
 :- style_check(- singleton).
-:- use_module(library(clpfd)).
+:- use_module(library(clpfd)). % librairie de programmation logique
+                               % par contrainte à domaine fini
+
+testNoms([  anne, michel, manon, alice, juliette, lucie, charlotte, olivia, margaux,
+            jules, hugo, tom, louis, paul, jean, antoine  ]).
+
+go(Lassoc) :-
+    testNoms(L),
+    length(L,Nb),
+    produire_liste(L,Lassoc),
+    term_variables(Lassoc,Labels),
+    all_different(Labels),
+    mme_mr(Lassoc,Nb),
+    alternate(Lassoc),
+    label(Labels),
+    write(Labels).
+
+mme_mr([Mme|T],Nb):-
+    getvar(Mme,VarMme),
+    1 #=  VarMme,
+    nth0(0,T,Mr),
+    getvar(Mr,VarMr),
+    Mid is Nb/2,
+    Mid #= VarMr.
+
+alternate([]).
+alternate([H]).
+alternate([H|T]):-
+    get_suivant(T,Suivant),!,
+    getname(H,N1),
+    getname(Suivant,NameSuiv),
+    genre_compatible(N1,NameSuiv),
+    alternate(T).
+
+get_suivant([],[]) .
+get_suivant([H|T],H) .
 
 
-% ---------------------------------------------------------------------- %
-%                                                                        %
-%                        PREDICAT PRINCIPAL                              %
-%                                                                        %
-% ---------------------------------------------------------------------- %
-testNoms([  manon, alice, juliette, lucie, charlotte, olivia, margaux,
-                     jules, hugo, tom, louis, paul, jean, antoine  ]).
-testNoms2([  manon, alice, juliette, paul, jean, antoine  ]).
+getname(PersVar,Name):-
+    Persvar=(Name,_).
 
-go :- Lconvives = [  manon, alice,juliette,
-              %    juliette, lucie,
-              %    charlotte, olivia, margaux, jules, hugo, tom, louis, paul,
-                     paul,jean, antoine],
-      table(Lconvives).
-
-table(Lconvives,Lassoc) :-
-
-    length([anne,michel|Lconvives],Nb),
-    produire_lassoc([anne,michel|Lconvives],Nb,Lassoc),
-    alternance_homme_femme(Lassoc,Nb),
- %   meme_hobby(Lassoc,Nb),
-/*
-
-    pas_epoux_cote_a_cote(Lassoc,Nb),
-    pas_incompatibilite(Lassoc,Nb),
-    places_differentes(Lassoc),
-
-*/
-    label_places(Lassoc),
-    sort(2,@<,Lassoc,Lassoc_trie),
-    writeln(Lassoc_trie),
-    impression_table(Lassoc_trie).
+genre_compatible(Name1, Name2) :-
+    sexe(Name1, Sexe1),!, sexe(Name2,Sexe2),not(Sexe1=Sexe2).
 
 
-% ---------------------------------------------------------------------- %
-%                          LISTE ASSOCIATIVE                             %
-% ---------------------------------------------------------------------- %
-produire_lassoc( [], _, [] ).
-produire_lassoc( [H|T], Nb, [pers_var(H,Var)|Reste] ):-
-    set_domain(Var,T,Nb),
-    produire_lassoc(T,Nb,Reste).
+getvar(PersVar,Var):-
+    PersVar=pers_var(_,Var).
 
-set_domain(H,T,Nb) :-
-    (   length(T,X), C is Nb-2, X#>=C *-> true,             %goal: if Tail>=14
-         Mid is Nb/2,
-         H in 1..1 \/ Mid..Mid                              %if True: Domain {1..8}
-    ;   true,  Mid is Nb/2, Mid_1 is Mid-1, MidPlus1 is Mid+1,
-         H in 2..Mid_1 \/ MidPlus1..Nb                      %else: Domain {2..16}\{8}
-    ).
+produire_liste([],[]).
+produire_liste([H|T],[pers_var(H,Var)|Rest]):-
+    Var in 1..16,
+    produire_liste(T,Rest).
 
-getAssoc(List,Nom,Var):- member( pers_var(Nom,Var) , List).
-
-
-
-
-
-
-% ---------------------------------------------------------------------- %
-%                                                                        %
-%                               CONTRAINTES                              %
-%                                                                        %
-% ---------------------------------------------------------------------- %
-
-% Alternance homme-femme
-% ----------------------
-alternance_homme_femme( [],_ ).
-alternance_homme_femme( [pers_var(P,V)|Rest],Nb ) :-
-    sexe(P,m),
-    V mod 2 #= 0,
-    alternance_homme_femme( Rest,Nb ).
-
-alternance_homme_femme( [pers_var(P,V)|Rest],Nb ) :-
-    sexe(P,f),
-    V mod 2 #= 1,
-    alternance_homme_femme( Rest,Nb ).
-
-
-
-
-
-% Meme hobby
-% ----------
-
-/*
-meme_hobby( [],Nb ).
-meme_hobby( [pers_var(P,V)|Rest],Nb ) :-
-    member(pers_var(Pdr,Vdr),Rest),
-    hobby(P,L1),hobby(Pdr,L2),
-    compatible_hobby2( L1, L2),
-    Vdr =:= V+1,
-    meme_hobby(Rest,Nb).
-*/
-
-
-compatible_hobby2(L1,L2) :-
-   member(H,L1),
-   member(H,L2).
-
-
-
-
-
-
-% Pas epoux cote a cote
-% ---------------------
-
-pas_epoux_cote_a_cote(  ) .
-
-
-% Pas d incompatibilite
-% ---------------------
-
-pas_incompatibilite(  ) .
-
-
-% Personnes a des places differentes
-% ----------------------------------
-
-places_differentes(  ) .
-
-% ---------------------------------------------------------------------- %
-%                                                                        %
-%                                LABELING                                %
-%                                                                        %
-% ---------------------------------------------------------------------- %
-
-
-label_places(Lassoc):-
-    makelist(Lassoc,List),
-    all_different(List),
-    label(List),
-    makenew(Lassoc,List).
-
-makelist([], []) .
-makelist( [pers_var(P,V)|T], [V|Rest] ):-
-    makelist(T,Rest).
+getlist([], []).
+getlist([H|T], [Var|Rest]):-
+    X=pers_var(N,Var),
+    getlist(T,Rest).
 
 makenew([], []).
-makenew([pers_var(_,V)|T], [V|Rest]) :-
-    makenew(T,Rest).
+makenew([H|T], [pers_var(N,H)|Rest]):-
+        makenew(T,Rest).
 
-
-
-
-% ---------------------------------------------------------------------- %
-%                                                                        %
-%                                IMPRESSION                              %
-%                                                                        %
-% ---------------------------------------------------------------------- %
-
-impression_table([]) :- !, nl.
-impression_table([pers_var(P,V)|T]) :-
-    nl, format('~w ~d ~w ~a',['Place ',V, ' :', P]),
-    impression_table(T).
-
-
-% ---------------------------------------------------------------------- %
-%                                                                        %
-%                            BASE DE DONNEES                             %
-%                                                                        %
-% ---------------------------------------------------------------------- %
 
 epoux(anne,michel).
 epoux(manon,jules).
