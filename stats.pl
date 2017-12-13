@@ -32,3 +32,16 @@ Place  16  : antoine
 % 2 threads, 45 finished threads used 57.674 seconds
 true
 %--------------------------------------------------------
+
+Strategy: ffc
+% 120,894 inferences, 0.029 CPU in 0.063 seconds (46% CPU, 4173220 Lips)
+Strategy: up
+% 111,936 inferences, 0.021 CPU in 0.055 seconds (39% CPU, 5241676 Lips)
+Strategy: down
+% 105,968 inferences, 0.020 CPU in 0.055 seconds (37% CPU, 5302907 Lips)
+Strategy: leftmost
+% 111,933 inferences, 0.029 CPU in 0.063 seconds (46% CPU, 3836607 Lips)
+Strategy: min
+% 100,328 inferences, 0.018 CPU in 0.054 seconds (33% CPU, 5631027 Lips)
+Strategy: max
+% 99,897 inferences, 0.019 CPU in 0.045 seconds (43% CPU, 5189994 Lips)
