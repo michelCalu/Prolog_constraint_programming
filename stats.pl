@@ -45,3 +45,27 @@ Strategy: min
 % 100,328 inferences, 0.018 CPU in 0.054 seconds (33% CPU, 5631027 Lips)
 Strategy: max
 % 99,897 inferences, 0.019 CPU in 0.045 seconds (43% CPU, 5189994 Lips)
+
+
+Strategy: max
+% 509,632 inferences, 0.085 CPU in 0.117 seconds (73% CPU, 6013925 Lips)
+Strategy: min
+% 493,356 inferences, 0.087 CPU in 0.125 seconds (70% CPU, 5656974 Lips)
+Strategy: ffc
+% 600,879 inferences, 0.112 CPU in 0.129 seconds (87% CPU, 5383690 Lips)
+Strategy: leftmost
+% 527,908 inferences, 0.085 CPU in 0.108 seconds (79% CPU, 6183910 Lips)
+Strategy: up
+% 527,911 inferences, 0.084 CPU in 0.109 seconds (77% CPU, 6305297 Lips)
+Strategy: down
+% 499,420 inferences, 0.081 CPU in 0.107 seconds (75% CPU, 6189904 Lips)
+
+% en ordre inverse:
+Strategy: down
+% 512,508 inferences, 0.083 CPU in 0.110 seconds (75% CPU, 6202970 Lips)
+%sans les hobbies:
+Strategy: down
+% 137,856 inferences, 0.023 CPU in 0.057 seconds (41% CPU, 6003135 Lips)
+%sans les hobbies et les incompatibilités
+Strategy: down
+% 128,170 inferences, 0.018 CPU in 0.043 seconds (43% CPU, 6938610 Lips)
