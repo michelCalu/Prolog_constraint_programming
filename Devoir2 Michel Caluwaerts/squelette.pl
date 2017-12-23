@@ -33,9 +33,12 @@ diner(Lconvives) :-
 %                          LISTE ASSOCIATIVE                             %
 % ---------------------------------------------------------------------- %
 /**************************************************************************/
+% produire_lassoc(Liste_invités, Lassoc, Longeur_liste)
+%     in: Liste d'invités
+%     out: Liste de (pervar(nom1,Variable1),(pervar(nom2,Variable2),...,(pervar(nomNb,VariableNb)
 % produire_persvar(Liste_de_convives, Liste_de_pers_Var)
 %     in: liste d'invités
-%     out: liste de pers_var avec domaines de Anne et Michel fixés
+%     out: liste de pers_var avec domaines de Anne et Michel fixés à 1..1 et Nb/2..Nb/2+1
 %
 produire_lassoc( [], _, [] ).
 produire_lassoc(List,Lassoc, Nb):-
@@ -56,9 +59,9 @@ getPers_var(Pers, Var, List):-
         member(pers_var(Pers, Var), List).
 
 /**************************************************************************/
-% mme_mr( pers_var(Madame), pers_var(Monsieur)
-%     in: pers_var
-%     out: domaine Madame={1}, domaine Monsieur={Nb/2}
+% mme_mr( pers_var(Madame), pers_var(Monsieur))
+%     in: pers_var(Madame,VarMadame), pers_var(Monsieur,VarMonsieur)
+%     out: domaine VarMadame={1}, domaine VarMonsieur={Nb/2} ssi Nb/2 pair, VarMonsieur={Nb/2+1} sinon
 %
 mme_mr([Mme,Mr|_],Nb):-
     Mid is Nb/2,
@@ -98,8 +101,8 @@ partenaire(X,Partenaire):-
 
 /**************************************************************************/
 % alternance_homme_femme( Lassoc, Longueur)
-%     in: liste des invités
-%     out: domaine femmes={x|x mod 2 = 1}, domaine femmes={x|x mod 2 = 0}
+%     in: liste des invités, Longueur
+%     out: domaine femmes={x|x mod 2 = 1}, domaine hommes={x|x mod 2 = 0}
 
 alternance_homme_femme( [], _).
 alternance_homme_femme( [pers_var(P,V)|Rest],Nb ) :-
@@ -113,7 +116,7 @@ alternance_homme_femme( [pers_var(P,V)|Rest],Nb ) :-
 /**************************************************************************/
 % pas_epoux_cote_a_cote( Lassoc, Longueur)
 %     in: liste des invités
-%     out: domaine femmes={x|x mod 2 = 1}, domaine femmes={x|x mod 2 = 0}
+%     out: Lassoc tq: forall pers_var(nom1, Var1), pers_var(nom2, Var2), epoux(nom1,nom2) ==> abs(Var1-Var2)>1
 %
 pas_epoux_cote_a_cote(_, [], _).
 pas_epoux_cote_a_cote(Lassoc, [p(Name1,_,Epoux_1,_,_)|T], Nb ):-
@@ -124,9 +127,9 @@ pas_epoux_cote_a_cote(Lassoc, [p(Name1,_,Epoux_1,_,_)|T], Nb ):-
 
 
 /**************************************************************************/
-% meme_hobby( [Lassoc], [Liste_Data])
-%     in: Lassoc, Data
-%     out: Domaines des pers_var modifiés dans Lassoc
+% meme_hobby( [Lassoc], [Liste_Data], Longueur)
+%     in: Lassoc, Data, Longueur
+%     out: Lassoc tq: forall pers_var(nom1, Var1), pers_var(nom2, Var2); (abs(Var1-Var2)=1) ==> exists(hobby(nom1,X)AND hobby(nom2,X))
 %
 meme_hobby( [], _, Nb).
 meme_hobby( [pers_var(Name1, Var1)|T], Data, Nb) :-
@@ -154,9 +157,10 @@ eliminer_hobby_incomp([H|T], VarName, Lassoc, Nb):-
 
 
 /**************************************************************************/
-% pas_incompatibilite( [Liste_Data], [Lassoc])
-%     in: Data, Lassoc
-%     out: Domaines des pers_var modifiés dans Lassoc
+% pas_incompatibilite( [Liste_Data], [Lassoc], Longueur)
+%     in: Data, Lassoc, Longueur
+%     out: Lassoc tq: forall pers_var(nom1, Var1), pers_var(nom2, Var2) in Lassoc; (abs(Var1-Var2)=1) ==>
+%                       not exists(incompatibilite(nom1,nom2) OR (incompatibilite(nom2,nom1))
 %
 pas_incompatibilite([], _, Nb ).
 
@@ -186,10 +190,11 @@ eliminer_ennemis([E|Ennemis], Var, Lassoc, Nb):-
 % ---------------------------------------------------------------------- %
 
 /**************************************************************************/
-% label_places( [Liste_Data], [Lassoc])
-%     in: Data, Lassoc
-%     out: Domaines des pers_var modifiés dans Lassoc
-%     strat(x): x in {min, max, ff, ffc, leftmost,...}
+% label_places( [Lassoc])
+%     in: Lassoc
+%     out: Lassoc avec labeling t.q pers_var(a,V1),pers_var(a,V2),...pers_var(a,VNb), avec V1,V2,...VNb in 1..Nb
+%           AND not exists( pers_var(a,Vx),pers_var(a,Vy) tq a=/=b AND Vx = Vy,
+%           AND strat(x): x in {min, max, ff, ffc, leftmost,...}
 %
 strat(down).                  %stratégie de labeling à appliquer
 label_places(Lassoc):-
